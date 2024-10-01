@@ -1,5 +1,6 @@
 //server base domain url 
 const domainUrl = "http://localhost:3000";  // if local test, pls use this 
+//const domainUrl = "https://coit20269-assignment3.onrender.com";
 
 //==================================index.html==================================//
 
@@ -93,67 +94,7 @@ $(document).ready(function () {
 	--------------------------end--------------------------
 	**/
 
-	/**
-	--------------------Event handler to respond to signUp Button----------------------
-	**/
 
-	$('#signUpButton').click(function () {
-
-		localStorage.removeItem("signUpData");
-
-		// Serialize form data automatically as an array of name-value pairs
-		var formArray = $("#signUpForm").serializeArray();
-
-		// Convert the array into an object for easy handling
-		var formData = {};
-		var haveValues = true;
-
-		$.each(formArray, function (i, field) {
-			formData[field.name] = field.value;
-			if (field.value.trim() == "") { // If any value is not empty
-				haveValues = false;
-			}
-		});
-
-		// Store form data into localStorage for later use
-		localStorage.setItem("signUpData", JSON.stringify(formData));
-		console.log(localStorage.signUpData);
-
-		var inputData = {};
-		inputData["email"] = formData["email"];
-
-		$.post(domainUrl + "/verifyUser", inputData, function (data, status) {
-
-			if (haveValues && data.length === 0) {
-
-				var signUpData = JSON.parse(localStorage.getItem("signUpData"));
-
-				$.post(domainUrl + "/addUser", signUpData, function (data, status) {
-					if (status) {
-						alert("Signup success");
-						$.mobile.changePage("#loginPage");
-					}
-					else {
-						alert("Signup failed");
-					}
-
-					$("#signUpForm").trigger('reset');
-				});
-
-				$.mobile.changePage("#loginPage");
-			}//end if statement
-			else if (data.length > 0)
-				alert("User Email already exists");
-			//$("#signUpForm").trigger('reset');	
-			else
-				alert("Signup failed");
-
-		});
-	});
-
-	/**
-	--------------------------end--------------------------
-	**/
 
 	/**
 	--------------------Signup form JQuery validation plugin----------------------
@@ -582,9 +523,8 @@ $(document).ready(function () {
 		var inputData = {};
 		inputData["email"] = formData["email"];
 
-		$.post(domainUrl + "/verifyUserEmailExist", inputData, function (data, status) {
-			if (status === "success") {
-				if (haveValues && data.length === 0) {
+		$.get(domainUrl + "/getUserByEmail", {email: formData["email"]}, function (data, status) {
+			if (!data) {
 					var signUpData = JSON.parse(localStorage.getItem("signUpData"));
 					console.log("Data:", signUpData);
 					$.post(domainUrl + "/addUser", signUpData, function (data, status) {
@@ -596,13 +536,10 @@ $(document).ready(function () {
 						}
 						$("#signUpForm").trigger('reset');
 					});
-				} else if (data.length > 0) {
-					alert("User Email already exists");
-					$("#signUpForm").trigger('reset');
-				} else {
-					alert("Signup failed");
-				}
-			} else {
+			} else if (data) {
+				alert("Email already exists. Try another Email!");
+				$("#signUpForm").trigger('reset');
+			}else {
 				alert("Error verifying user");
 			}
 		});
@@ -750,7 +687,7 @@ $(document).ready(function () {
 				} else {
 
 					// Loop over each solution and create a tile
-					JSON.parse(data).forEach(solution => {
+					data.forEach(solution => {
 						const tile = `
 						<div class="tile" data-solution-id="${solution._id}">
 							<div class="tile-content">
@@ -829,7 +766,7 @@ $(document).ready(function () {
 				} else {
 
 					// Loop over each solution and create a tile
-					JSON.parse(data).forEach(solution => {
+					data.forEach(solution => {
 						const tile = `
 						<div class="tile" data-solution-id="${solution._id}">
 							<div class="tile-content">
@@ -946,11 +883,12 @@ $(document).ready(function () {
 	/**
 	----------------------Hide dropdown if clicked outside----------------------
 	**/
-	$(document).on('click', function (event) {
-		if (!$(event.target).closest('#profileButton, #profileDropdown').length) {
-			$('#profileDropdown').hide();
-		}
-	});
+	$(document).on('click', function(event) {
+        if (!$(event.target).closest('#profileButton, #profileDropdown, #profProfileButton, #profProfileDropdown').length) {
+            $('#profileDropdown').hide();
+			$('#profProfileDropdown').hide();
+        }
+    });
 
 });
 

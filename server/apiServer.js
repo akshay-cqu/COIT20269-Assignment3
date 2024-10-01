@@ -116,7 +116,7 @@ app.get('/getUserByEmail', (req, res) => {
 			console.error("Error retrieving user: ", err);
 			res.status(500).send({ error: "Internal Server Error" });
 		} else if (!doc) {
-			res.status(404).send({ error: "User record not found" });
+			res.status(200).send(doc);
 		} else {
 			console.log(JSON.stringify(doc) + " has been retrieved.\n");
 			res.status(200).send(doc);
